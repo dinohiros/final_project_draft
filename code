@@ -2,58 +2,96 @@ import requests, json
 # api key
 api_key = "a255d05011ec6ceb1fd67a16aeccb147"
 
-# not sure why this function doesn't work
-# city parameter in api becomes unresolved when using this function
-#def get_city():
-    #city = input("Please enter city name: ")
-    #return city
+# function that uses city name to get forecast
+def use_city():
+    city = input("Please enter city name: ")
+    api_call = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + api_key + "&units=imperial"
+    response = requests.get(api_call)
+    weather = response.json()
 
-# ask user for input
-city = input("Please enter your city name: ")
+# try block to establish connection based on user input
+    try:
+        response = requests.get(api_call)
+        response.raise_for_status()
+        print("\nConnection successful.")
+        print(f"{city.title()} Forecast:")
+        # if successful call function to display the weather output
+        show_weather_info(weather)
 
-# full api call
-# units are imperial to get fahrenheit
-api_call = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&appid="+api_key+"&units=imperial"
+    except requests.HTTPError as exception:
+        print("Connection unsuccessful. Please check your input.")
 
-# http request
-response = requests.get(api_call)
-api_data = response.json()
+# ask user if they would like to perform another search
+    another_search = input("Do you want to receive another forecast? Type yes or no: ")
+    if another_search == "Yes" or another_search == "yes":
+        main()
+    if another_search == "No" or another_search == "no":
+        print("Enjoy the weather. Bye!")
+        exit()
+    else:
+        print("Invalid input.")
+        print("Enjoy the weather. Bye!")
+        exit()
 
-# function
-def show_weather_info():
-    # variables
-    temperature = (api_data['main']['temp'])
-    like_temp = (api_data['main']['feels_like'])
-    humid = (api_data['main']['humidity'])
+# function that uses zipcode to get forecast
+def use_zip():
+    zip = input("Please enter zip code: ")
+    api_call = "https://api.openweathermap.org/data/2.5/weather?zip=" + zip + "&appid=" + api_key + "&units=imperial"
+    response = requests.get(api_call)
+    weather = response.json()
+
+# try block to establish connection based on user input
+    try:
+        response = requests.get(api_call)
+        response.raise_for_status()
+        print("\nConnection successful.")
+        print(f"{zip} Forecast:")
+        # if successful call function to display weather output
+        show_weather_info(weather)
+
+    except requests.HTTPError as exception:
+        print("Connection unsuccessful. Please check your input.")
+
+    # ask user if they would like to perform another search
+    another_search = input("\nDo you want to receive another forecast? Type yes or no: ")
+    if another_search == "Yes" or another_search == "yes":
+        main()
+    if another_search == "No" or another_search == "no":
+        print("Enjoy the weather. Bye!")
+        exit()
+    else:
+        print("Invalid input.")
+        print("Enjoy the weather. Bye!")
+        exit()
+
+# function that displays the weather forecast
+def show_weather_info(weather):
+    # variables to be displayed
+    temperature = (weather['main']['temp'])
+    like_temp = (weather['main']['feels_like'])
+    humid = (weather['main']['humidity'])
     # delete decimals
     t = int(temperature)
     lt = int(like_temp)
 
     # print calls
-    print(f"\n{city.title()} Forecast")
     print(f"Current Temperature: {t}º")
     print(f"Feels Like: {lt}º")
     print(f"Humidity: {humid}%")
 
-# validate user input
-# call function if city found
-if response.status_code == 200:
-    show_weather_info()
-
-# display error if invalid
-else:
-    print("City not found.")
-
-# ask user if they would like another forecast
-newCity = input("Do you want to check the forecast for another city? (yes or no): ")
-while newCity == "yes" or newCity == "y":
-    # would like to call a function here to get city name
-    # as is this just reprints the old info
-    input("Please enter a city location: ")
-    show_weather_info()
+# main function
+# asks user if they want to search by city or zip
+# based on user input calls the other functions to run program
+def main():
+    while True:
+        city_or_zip = input("To receive a weather forecast type c for city or z for zip code: ")
+        if city_or_zip == 'c' or city_or_zip == 'C':
+            use_city()
+        if city_or_zip == 'z' or city_or_zip == 'Z':
+            use_zip()
+        else:
+            print("Invalid input. Please try again.")
 
 
+main()
 
-    #newCity = input("Do you want to check the forecast for another city? (yes or no): ")
-    if newCity == "no":
-        print("Thanks for visiting.")
